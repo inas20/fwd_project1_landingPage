@@ -48,7 +48,9 @@ var isScrolling = true;
 // top button
 const topButton = document.getElementById("topBtn");
 //nav bar
-let navHeader = document.querySelector('.navbar__menu')
+let navHeader = document.querySelector('.navbar__menu');
+// active section
+let active = "";
 
 /**
  * End Global Variables
@@ -78,31 +80,6 @@ function createSection(sectionItem){
     mainBody.appendChild(section)
 }
 
-// check is section in viewport 
-function isSectionInViewport(sectionElement) {
-  var sect = sectionElement.getBoundingClientRect();
-  return (
-    sectionElement.top >= 0 &&
-    sectionElement.left >= 0 &&
-    sectionElement.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    sectionElement.right  <= (window.innerWidth || document.documentElement.clientWidth)
-  );
-}
-
-
-// get relative section position to its parent
-// function getRelativeSectionPosition(element) {
-//     var sect = element.getBoundingClientRect();
-//     const parentSect = element.offsetParent.getBoundingClientRect();
-//     return {
-//       bottom: parentSect.bottom - sect.bottom,
-//       height: sect.height,
-//       left: sect.left - parentSect.left,
-//       right: parentSect.right - sect.right,
-//       top: sect.top - parentSect.top,
-//       width: sect.width
-//     };
-// }
 
 /**
  * End Helper Functions
@@ -133,38 +110,19 @@ function clickEventListner(event){
      // check sect has value and not null
      if(!!sect){
         sect.scrollIntoView(true,{ behavior: 'smooth', block: "start" });
-        setTimeout(function() {
-            console.log(isSectionInViewport(sect))
-        }, 1000);
-        hightLightActive(sect, event);
      }
 }
 
 
-// hightlight nav item and active section
-hightLightActive = (elem, event)=>{
- //   if(isSectionInViewport(sect)){
-        //set section as active 
-        elem.classList.add('active-class')
-        //highlight the anchor nav item
-        //event.target.classList.add('active-link')
-    // }else{
-    //     let activeLink = document.querySelector('.active-link');
-    //     let activeSect = document.querySelector('.active-class');
-    //     if(!!activeLink && !! activeSect){
-    //         activeLink.classList.remove('active-link');
-    //         activeSect.classList.remove('active-class');
-    //     }
-    // }
-}
-
+// check if the element is in viewport and highlighted it
 isElementInViewport =(element)=>{
   const elementHeight = element.clientHeight;
   const elementTop = element.offsetTop;
   if (pageYOffset >= elementTop - elementHeight / 3) {
-    //current = element.getAttribute("id");
-    console.log("currennttttttttttttt", current)
-    hightLightActive(element)
+    active = element.getAttribute("id");
+    element.classList.add('active-class')
+  }else{
+    element.classList.remove('active-class');
   }
 }
 
@@ -176,36 +134,23 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', ()=> {
         const sections = document.querySelectorAll('section');
         const navLi = document.querySelectorAll(".navbar__menu li a");
-        // on scroll fetch sections;
-        // sections.forEach(element => {
-        //     //for each section
-        //     if (isSectionInViewport(element)) {
-        //         //if in Viewport
-        //         hightLightActive(element)
-        //     }
-        // })
-        //console.log('navLi-------',navLi)
-        let current = "";
+        // on scroll fetch sections and check which is in viewport
         sections.forEach((section) => {
-          const sectionTop = section.offsetTop;
-          const sectionHeight = section.clientHeight;
-          if (pageYOffset >= sectionTop - sectionHeight / 3) {
-            current = section.getAttribute("id");
-            console.log("currennttttttttttttt", current)
-          }
+          section.classList.remove("active-class");
+          isElementInViewport(section)
         });
 
+        // highlight nav item which correponds to the active section
         navLi.forEach((a) => {
             a.classList.remove("active-link");
-            console.log('list---', a.classList.contains(current), a.classList)
-            if (a.classList.contains(current)) {
+            if (a.classList.contains(active)) {
               a.classList.add("active-link");
-              console.log('claslists--------', a.classList)
             }
         });
 
         displayTopBtn();
-        //hightLightActive(sect)
+
+        // hide nav bar if scrolling stops
         if(document.documentElement.scrollTop != 0){
             // Clear our timeout during scrolling
             window.clearTimeout( isScrolling );
@@ -214,15 +159,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 // hide the nav bar
                 //navHeader.setAttribute("style", "display:none")
             }, 1500);
-        }else{
-            // display the nav bar when the document is at the top
-            //navHeader.style.display = "block";
-            navHeader.setAttribute("style","color: red");
-            console.log("----------to-------------",document.documentElement.scrollTop)
-            console.log(navHeader)
         }
     },false);
 });
+
 
 // change top btn displaying while scrolling
 displayTopBtn =()=>{
